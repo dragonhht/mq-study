@@ -19,8 +19,7 @@ public class Sender {
     @Test
     public void sender() throws JMSException {
         // 建立ConnectionFactory工厂对象,使用默认的用户名及密码
-        ConnectionFactory factory = new ActiveMQConnectionFactory(ActiveMQConnectionFactory.DEFAULT_USER,
-                ActiveMQConnectionFactory.DEFAULT_PASSWORD,
+        ConnectionFactory factory = new ActiveMQConnectionFactory("dragonhht", "dragonhht",
                 "tcp://localhost:61616");
         // 通过ConnectionFactory创建Connection,并通过start开启连接
         Connection connection = factory.createConnection();
@@ -50,8 +49,7 @@ public class Sender {
     @Test
     public void consumer() throws JMSException {
         // 建立ConnectionFactory工厂对象,使用默认的用户名及密码
-        ConnectionFactory factory = new ActiveMQConnectionFactory(ActiveMQConnectionFactory.DEFAULT_USER,
-                ActiveMQConnectionFactory.DEFAULT_PASSWORD,
+        ConnectionFactory factory = new ActiveMQConnectionFactory("dragonhht", "dragonhht",
                 "tcp://localhost:61616");
         // 通过ConnectionFactory创建Connection,并通过start开启连接
         Connection connection = factory.createConnection();
