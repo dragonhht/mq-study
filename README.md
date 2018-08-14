@@ -213,3 +213,75 @@ public class QueueReceiver implements MessageListener {
     }
 }
 ```
+
+# 5、Spring Boot 整合ActiveMQ
+
+-   引入相关依赖
+
+```
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-activemq</artifactId>
+		</dependency>
+```
+
+-   配置ActiveMQ
+
+```
+spring:
+  activemq:
+    broker-url: tcp://localhost:61616
+    user: dragonhht
+    password: dragonhht
+    in-memory: false
+    pool:
+      enabled: false
+```
+
+-   在启动类中使用注解`@EnableJms`开启JMS
+
+-   定义队列
+
+```
+	@Bean
+	public Queue queue() {
+		return new ActiveMQQueue("spring-boot-test");
+	}
+```
+
+-   生产者(此处在Controller中写，方便产生消息)
+
+```
+@RestController
+public class ActiveMQController {
+
+    @Autowired
+    private JmsMessagingTemplate jmsMessagingTemplate;
+    @Autowired
+    private Queue queue;
+
+    /**
+     * 生产者.
+     * @param message
+     */
+    @RequestMapping("/send")
+    public void sender(String message) {
+        this.jmsMessagingTemplate.convertAndSend(queue, message);
+    }
+}
+```
+
+-   消费者
+
+```
+@Component
+public class Receiver {
+
+    // 监听队列
+    @JmsListener(destination = "spring-boot-test")
+    public void receiver(String text) {
+        System.out.println("接收到： " + text);
+    }
+
+}
+```

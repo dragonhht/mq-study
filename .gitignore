@@ -2,3 +2,6 @@
 target/
 *.iml
 */target/
+*.mvn/
+*mvnw.cmd
+*mvnw
