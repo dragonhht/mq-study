@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/jms
+        http://www.springframework.org/schema/jms/spring-jms-4.0.xsd
+        http://activemq.apache.org/schema/core
+        http://activemq.apache.org/schema/core/activemq-core-5.8.0.xsd">
+
+
+    <!-- ActiveMQ 连接工厂 -->
+    <amq:connectionFactory id="amqConnectionFactory" brokerURL="tcp://localhost:61616" userName="dragonhht" password="dragonhht" />
+    <!-- Spring Caching连接工厂 -->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <!--Connection的ConnectionFactory-->
+        <property name="targetConnectionFactory" ref="amqConnectionFactory" />
+        <!--Session缓存数-->
+        <property name="sessionCacheSize" value="100" />
+    </bean>
+
+    <!--JmsTemplate-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <constructor-arg ref="connectionFactory" />
+        <!--定义是否为pub/sub模型（发布/订阅），false为非pub/sub模型（发布/订阅）模式，即队列模式-->
+        <property name="pubSubDomain" value="false" />
+    </bean>
+
+    <!--定义消费者-->
+    <bean id="queueReceiver" class="hht.dragon.activemq.QueueReceiver"></bean>
+
+    <!--定义监听器-->
+    <!--destination-type属性确定是队列还是主题-->
+    <jms:listener-container destination-type="queue" container-type="default" connection-factory="connectionFactory" acknowledge="auto">
+        <jms:listener destination="test-1" ref="queueReceiver" />
+    </jms:listener-container>
+</beans>

@@ -121,3 +121,95 @@
  # 3、启用事务
  
  -  启用事务后，发送者需在发送完消息后提交事务: `session.commit();`
+ 
+ # 4、Spring 整合ActiveMQ
+ 
+ -  引入相关依赖
+ 
+ ```
+        <!--activeMQ-->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>5.15.5</version>
+        </dependency>
+        <!-- Spring整合ActiveMQ所需依赖 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+            <version>${springversion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>${springversion}</version>
+        </dependency>
+```
+ 
+ -  对ActiveMQ进行配置
+ 
+ ```
+    <!-- ActiveMQ 连接工厂 -->
+    <amq:connectionFactory id="amqConnectionFactory" brokerURL="tcp://localhost:61616" userName="dragonhht" password="dragonhht" />
+    <!-- Spring Caching连接工厂 -->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <!--Connection的ConnectionFactory-->
+        <property name="targetConnectionFactory" ref="amqConnectionFactory" />
+        <!--Session缓存数-->
+        <property name="sessionCacheSize" value="100" />
+    </bean>
+
+    <!--JmsTemplate-->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <constructor-arg ref="connectionFactory" />
+        <!--定义是否为pub/sub模型（发布/订阅），false为非pub/sub模型（发布/订阅）模式，即队列模式-->
+        <property name="pubSubDomain" value="false" />
+    </bean>
+
+    <!--定义消费者-->
+    <bean id="queueReceiver" class="hht.dragon.activemq.QueueReceiver"></bean>
+
+    <!--定义监听器-->
+    <!--destination-type属性确定是队列还是主题-->
+    <jms:listener-container destination-type="queue" container-type="default" connection-factory="connectionFactory" acknowledge="auto">
+        <jms:listener destination="test-1" ref="queueReceiver" />
+    </jms:listener-container>
+```
+ 
+ -  生产者
+ 
+ ```
+@Component
+public class Sender {
+
+    @Autowired
+    @Qualifier("jmsTemplate")
+    private JmsTemplate jmsTemplate;
+
+    public void send(String queueName, final String message) {
+        jmsTemplate.send(queueName, new MessageCreator() {
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                return session.createTextMessage(message);
+            }
+        });
+    }
+
+}
+```
+ 
+ -  消费者（通过监听）
+ 
+ ```
+@Component
+public class QueueReceiver implements MessageListener {
+    @Override
+    public void onMessage(Message message) {
+        try {
+            System.out.println("收到消息: " + ((TextMessage)message).getText());
+        } catch (JMSException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
