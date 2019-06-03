@@ -118,9 +118,21 @@
  
  -  `Session.DUPS_OK_ACKNOWLEDGE`: 指示Session不必确保对消息进行签收（可能一起重复消息）
  
- # 3、启用事务
+ # 3、事务设置
  
- -  启用事务后，发送者需在发送完消息后提交事务: `session.commit();`
+ ## 事务性会话
+ 
+-   当创建会话时`connection.createSession(true, Session.AUTO_ACKNOWLEDGE)`传入`true`时，将使用事务性会话。启用事务后，发送者需在发送完消息后提交事务: `session.commit();`
+
+## 非事务性会话
+
+-   当创建会话时`connection.createSession(false, Session.AUTO_ACKNOWLEDGE)`传入`false`时,将使用第二个参数所设置的非事务性会话模式
+
+    -   `AUTO_ACKNOWLEDGE`: 当客户端成功从recive方法返回以后, 会话会自动确认该消息
+    
+    -   `CLIENT_ACKNOWLEDGE`: 客户端通过调用消息的`textMessage.acknowledge();`确认消息。在该模式下，若客户端循环接收消息，但只在第n个消息才确认时，则前面的n个消息将全部确认
+    
+    -   `DUPS_OK_ACKNOWLEDGE`: 延迟确认
  
  # 4、Spring 整合ActiveMQ
  
