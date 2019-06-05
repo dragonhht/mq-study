@@ -133,8 +133,27 @@
     -   `CLIENT_ACKNOWLEDGE`: 客户端通过调用消息的`textMessage.acknowledge();`确认消息。在该模式下，若客户端循环接收消息，但只在第n个消息才确认时，则前面的n个消息将全部确认
     
     -   `DUPS_OK_ACKNOWLEDGE`: 延迟确认
+    
+# 4、持久化/非持久化
+
+## 持久化
+
+-   在ActiveMQ中，默认发送者发送的消息是持久化的，且是同步的(发送者会等待broker对这条消息的反馈)
+
+-   若需要使用异步方式可进行设置:`((ActiveMQConnectionFactory) factory).setUseAsyncSend(true)`
+
+-   设置回执窗口大小设置: `((ActiveMQConnectionFactory) factory).setProducerWindowSize(500);`
  
- # 4、Spring 整合ActiveMQ
+## 非持久化
+
+-   设置非持久化: `producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);`
+
+-   非持久化时，ActiveMQ默认时采用异步方式发送消息
+
+-   设置每次发送消息时都需要接收broker的反馈:`((ActiveMQConnectionFactory) factory).setAlwaysSyncSend(true);`
+
+ 
+ # 5、Spring 整合ActiveMQ
  
  -  引入相关依赖
  
@@ -226,7 +245,7 @@ public class QueueReceiver implements MessageListener {
 }
 ```
 
-# 5、Spring Boot 整合ActiveMQ
+# 6、Spring Boot 整合ActiveMQ
 
 -   引入相关依赖
 
